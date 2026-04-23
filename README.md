@@ -4,7 +4,7 @@
 
 Asset Studio is a high-performance web tool designed to bridge the gap between design and production. It allows developers to generate, preview, and export production-ready app icons, splash screens, and adaptive icons that perfectly match Expo's latest standards (SDK 50+).
 
-![Asset Studio Preview](https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1200)
+![Asset Studio Preview](https://hb4l84277j.ufs.sh/f/0uBaxcnIufxY5FQ0KIs0FMZ2jOx6o4yfAthQXkaKsNHrUpi8)
 
 ## ✨ Features
 
@@ -25,7 +25,7 @@ Asset Studio is a high-performance web tool designed to bridge the gap between d
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/asset-studio.git
+   git clone https://github.com/moasko/asset-studio.git
    ```
 2. Install dependencies:
    ```bash
