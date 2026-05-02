@@ -8,8 +8,20 @@ export const RightSidebar = () => {
     bgColor, 
     darkBgColor, 
     copyConfig, 
-    copySuccess 
+    copySuccess,
+    splashResizeMode,
+    splashImageWidth
   } = useStudio();
+
+  const getSpecs = () => {
+    switch (assetType) {
+      case 'splash': return '2048x2048';
+      case 'favicon': return '48x48';
+      case 'notification': return '96x96';
+      case 'web-icons': return '192, 512';
+      default: return '1024x1024';
+    }
+  };
 
   return (
     <aside className="w-[300px] border-l border-[#27272a] bg-[#18181b] hidden xl:flex flex-col shrink-0">
@@ -29,16 +41,41 @@ export const RightSidebar = () => {
             </div>
             <div className="p-4 bg-[#09090b] rounded-xl font-mono text-[11px] text-[#a1a1aa] leading-[1.7] overflow-x-auto border border-[#27272a]">
               <p className="text-[#52525b] mb-2 text-[10px]">// app.json</p>
-              {assetType === 'adaptive-icon' ? (
+              
+              {assetType === 'splash' ? (
+                <>
+                  <p><span className="text-[#0066ff]">"plugins"</span>: [</p>
+                  <p className="pl-4">[</p>
+                  <p className="pl-8"><span className="text-[#0066ff]">"expo-splash-screen"</span>,</p>
+                  <p className="pl-8">&#123;</p>
+                  <p className="pl-12"><span className="text-[#0066ff]">"backgroundColor"</span>: <span className="text-[#22c55e]">"{bgColor}"</span>,</p>
+                  <p className="pl-12"><span className="text-[#0066ff]">"image"</span>: <span className="text-[#22c55e]">"./assets/splash-icon.png"</span>,</p>
+                  <p className="pl-12"><span className="text-[#0066ff]">"imageWidth"</span>: <span className="text-[#22c55e]">{splashImageWidth}</span>,</p>
+                  <p className="pl-12"><span className="text-[#0066ff]">"resizeMode"</span>: <span className="text-[#22c55e]">"{splashResizeMode}"</span></p>
+                  <p className="pl-8">&#125;</p>
+                  <p className="pl-4">]</p>
+                  <p>]</p>
+                </>
+              ) : assetType === 'adaptive-foreground' || assetType === 'monochrome' ? (
                 <>
                   <p><span className="text-[#0066ff]">"android"</span>: &#123;</p>
                   <p className="pl-4"><span className="text-[#0066ff]">"adaptiveIcon"</span>: &#123;</p>
-                  <p className="pl-8"><span className="text-[#0066ff]">"foregroundImage"</span>: <span className="text-[#22c55e]">"./assets/adaptive-icon.png"</span>,</p>
+                  <p className="pl-8"><span className="text-[#0066ff]">"foregroundImage"</span>: <span className="text-[#22c55e]">"./assets/adaptive-foreground.png"</span>,</p>
+                  <p className="pl-8"><span className="text-[#0066ff]">"monochromeImage"</span>: <span className="text-[#22c55e]">"./assets/monochrome-icon.png"</span>,</p>
                   <p className="pl-8"><span className="text-[#0066ff]">"backgroundColor"</span>: <span className="text-[#22c55e]">"{bgColor}"</span></p>
                   <p className="pl-4">&#125;</p>
                   <p>&#125;</p>
                 </>
-              ) : assetType === 'favicon' ? (
+              ) : assetType === 'notification' ? (
+                <>
+                  <p><span className="text-[#0066ff]">"android"</span>: &#123;</p>
+                  <p className="pl-4"><span className="text-[#0066ff]">"notification"</span>: &#123;</p>
+                  <p className="pl-8"><span className="text-[#0066ff]">"icon"</span>: <span className="text-[#22c55e]">"./assets/notification-icon.png"</span>,</p>
+                  <p className="pl-8"><span className="text-[#0066ff]">"color"</span>: <span className="text-[#22c55e]">"{bgColor}"</span></p>
+                  <p className="pl-4">&#125;</p>
+                  <p>&#125;</p>
+                </>
+              ) : assetType === 'favicon' || assetType === 'web-icons' ? (
                 <>
                   <p><span className="text-[#0066ff]">"web"</span>: &#123;</p>
                   <p className="pl-4"><span className="text-[#0066ff]">"favicon"</span>: <span className="text-[#22c55e]">"./assets/favicon.png"</span></p>
@@ -46,16 +83,8 @@ export const RightSidebar = () => {
                 </>
               ) : (
                 <>
-                  <p><span className="text-[#0066ff]">"userInterfaceStyle"</span>: <span className="text-[#22c55e]">"automatic"</span>,</p>
-                  <p><span className="text-[#0066ff]">"{assetType === 'icon' ? 'icon' : 'splash'}"</span>: &#123;</p>
-                  <p className="pl-4"><span className="text-[#0066ff]">"image"</span>: <span className="text-[#22c55e]">"./assets/{assetType === 'icon' ? 'icon.png' : 'splash-icon.png'}"</span>,</p>
-                  <p className="pl-4"><span className="text-[#0066ff]">"resizeMode"</span>: <span className="text-[#22c55e]">"contain"</span>,</p>
-                  <p className="pl-4"><span className="text-[#0066ff]">"backgroundColor"</span>: <span className="text-[#22c55e]">"{bgColor}"</span>,</p>
-                  <p className="pl-4"><span className="text-[#0066ff]">"dark"</span>: &#123;</p>
-                  <p className="pl-8"><span className="text-[#0066ff]">"image"</span>: <span className="text-[#22c55e]">"./assets/{assetType === 'icon' ? 'icon.png' : 'splash-icon-dark.png'}"</span>,</p>
-                  <p className="pl-8"><span className="text-[#0066ff]">"backgroundColor"</span>: <span className="text-[#22c55e]">"{darkBgColor}"</span></p>
-                  <p className="pl-4">&#125;</p>
-                  <p>&#125;</p>
+                  <p><span className="text-[#0066ff]">"icon"</span>: <span className="text-[#22c55e]">"./assets/icon.png"</span>,</p>
+                  <p><span className="text-[#0066ff]">"userInterfaceStyle"</span>: <span className="text-[#22c55e]">"automatic"</span></p>
                 </>
               )}
             </div>
@@ -69,7 +98,7 @@ export const RightSidebar = () => {
           <SectionTitle>Specs</SectionTitle>
           <div className="space-y-0.5">
             {[
-              { label: 'Resolution', value: assetType === 'splash' ? '2048 × 2048' : assetType === 'favicon' ? '48 × 48' : '1024 × 1024' },
+              { label: 'Resolution', value: getSpecs() },
               { label: 'Format', value: 'PNG-24' },
               { label: 'Color Space', value: 'sRGB' },
               { label: 'Density', value: '72 DPI' }
@@ -93,7 +122,7 @@ export const RightSidebar = () => {
                 <BookOpen size={13} />
               </div>
               <p className="text-[12px] text-[#a1a1aa] leading-relaxed">
-                Use high-contrast colors for visibility in both Light and Dark modes.
+                SDK 50+ uses the <code className="text-[#0066ff]">expo-splash-screen</code> plugin for better control.
               </p>
             </div>
             <div className="flex gap-3 p-3 bg-[#27272a]/60 rounded-xl border border-[#27272a]">
@@ -101,7 +130,7 @@ export const RightSidebar = () => {
                 <BookOpen size={13} />
               </div>
               <p className="text-[12px] text-[#a1a1aa] leading-relaxed">
-                Keep logo content within the center 60% of the canvas for safe cropping.
+                Android Monochrome icons are required for high-quality themed icon support.
               </p>
             </div>
           </div>
@@ -122,3 +151,4 @@ export const RightSidebar = () => {
     </aside>
   );
 };
+

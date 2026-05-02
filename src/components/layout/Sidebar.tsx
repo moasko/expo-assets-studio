@@ -10,7 +10,11 @@ import {
   Eye, 
   EyeOff, 
   Package,
-  Palette
+  Palette,
+  Bell,
+  Ghost,
+  Box,
+  Image as ImageIcon
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useStudio } from '../../context/StudioContext';
@@ -18,10 +22,13 @@ import { SectionTitle } from '../ui/SectionTitle';
 import { AssetType } from '../../types';
 
 const ASSET_OPTIONS: { type: AssetType; label: string; desc: string; icon: typeof FileImage }[] = [
-  { type: 'icon', label: 'App Icon', desc: '1024 × 1024', icon: FileImage },
-  { type: 'splash', label: 'Splash Screen', desc: '2048 × 2048', icon: Smartphone },
-  { type: 'adaptive-icon', label: 'Adaptive Icon', desc: '1024 × 1024', icon: Layers },
-  { type: 'favicon', label: 'Favicon', desc: '48 × 48', icon: Monitor },
+  { type: 'icon', label: 'App Icon', desc: '1024x1024', icon: FileImage },
+  { type: 'splash', label: 'Splash Screen', desc: '2048x2048', icon: Smartphone },
+  { type: 'adaptive-foreground', label: 'Adaptive Foreground', desc: '1024x1024', icon: Layers },
+  { type: 'monochrome', label: 'Monochrome Icon', desc: '1024x1024', icon: Ghost },
+  { type: 'notification', label: 'Notification Icon', desc: '96x96', icon: Bell },
+  { type: 'favicon', label: 'Favicon', desc: '48x48', icon: Monitor },
+  { type: 'web-icons', label: 'Web Icons', desc: '192, 512', icon: Box },
 ];
 
 export const Sidebar = () => {
@@ -32,6 +39,8 @@ export const Sidebar = () => {
     bgColor, setBgColor, 
     darkBgColor, setDarkBgColor, 
     logoScale, setLogoScale, 
+    splashResizeMode, setSplashResizeMode,
+    splashImageWidth, setSplashImageWidth,
     showSafeArea, setShowSafeArea, 
     downloadSingle, exportAll, 
     isExporting, 
@@ -65,7 +74,7 @@ export const Sidebar = () => {
                       {label}
                     </span>
                     <span className={`text-[10px] font-mono ${isActive ? 'text-[#a1a1aa]' : 'text-[#3f3f46]'}`}>
-                      {desc.replace(' × ', 'x')}
+                      {desc}
                     </span>
                   </div>
                 </button>
@@ -155,49 +164,50 @@ export const Sidebar = () => {
           </div>
 
           {/* Background Color */}
-          <div>
-            <SectionTitle>Background</SectionTitle>
-            <div className="flex items-center gap-2.5">
-              <div className="relative w-9 h-9 rounded-lg border border-[#3f3f46] overflow-hidden shrink-0 group cursor-pointer">
-                <input 
-                  type="color" 
-                  value={theme === 'light' ? bgColor : darkBgColor}
-                  onChange={(e) => theme === 'light' ? setBgColor(e.target.value) : setDarkBgColor(e.target.value)}
-                  className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer"
-                />
-              </div>
-              <div className="flex-1 relative">
-                <input 
-                  type="text" 
-                  value={theme === 'light' ? bgColor : darkBgColor}
-                  onChange={(e) => theme === 'light' ? setBgColor(e.target.value) : setDarkBgColor(e.target.value)}
-                  className="w-full bg-[#27272a] border border-[#3f3f46] rounded-lg px-3 py-2 text-[12px] font-mono font-medium text-[#fafafa] focus:ring-2 focus:ring-[#0066ff]/25 focus:border-[#0066ff]/40 focus:outline-none uppercase transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Suggested Palette */}
-            {suggestedColors.length > 0 && (
-              <div className="flex items-center gap-2 mt-3 p-2.5 bg-[#27272a] rounded-lg">
-                <Palette size={12} className="text-[#71717a] shrink-0" />
-                <div className="flex gap-1.5 flex-1">
-                  {suggestedColors.map((color, i) => (
-                    <button
-                      key={`${color}-${i}`}
-                      onClick={() => theme === 'light' ? setBgColor(color) : setDarkBgColor(color)}
-                      className={`w-6 h-6 rounded-md flex-shrink-0 transition-all duration-150 hover:scale-110 active:scale-95 ring-1 ring-white/[0.08] ${
-                        (theme === 'light' ? bgColor : darkBgColor) === color 
-                          ? 'ring-2 ring-[#0066ff] ring-offset-1 ring-offset-[#27272a]' 
-                          : ''
-                      }`}
-                      style={{ backgroundColor: color }}
-                      title={color}
-                    />
-                  ))}
+          {!['adaptive-foreground', 'notification', 'monochrome'].includes(assetType) && (
+            <div>
+              <SectionTitle>Background</SectionTitle>
+              <div className="flex items-center gap-2.5">
+                <div className="relative w-9 h-9 rounded-lg border border-[#3f3f46] overflow-hidden shrink-0 group cursor-pointer">
+                  <input 
+                    type="color" 
+                    value={theme === 'light' ? bgColor : darkBgColor}
+                    onChange={(e) => theme === 'light' ? setBgColor(e.target.value) : setDarkBgColor(e.target.value)}
+                    className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer"
+                  />
+                </div>
+                <div className="flex-1 relative">
+                  <input 
+                    type="text" 
+                    value={theme === 'light' ? bgColor : darkBgColor}
+                    onChange={(e) => theme === 'light' ? setBgColor(e.target.value) : setDarkBgColor(e.target.value)}
+                    className="w-full bg-[#27272a] border border-[#3f3f46] rounded-lg px-3 py-2 text-[12px] font-mono font-medium text-[#fafafa] focus:ring-2 focus:ring-[#0066ff]/25 focus:border-[#0066ff]/40 focus:outline-none uppercase transition-all"
+                  />
                 </div>
               </div>
-            )}
-          </div>
+
+              {suggestedColors.length > 0 && (
+                <div className="flex items-center gap-2 mt-3 p-2.5 bg-[#27272a] rounded-lg">
+                  <Palette size={12} className="text-[#71717a] shrink-0" />
+                  <div className="flex gap-1.5 flex-1">
+                    {suggestedColors.map((color, i) => (
+                      <button
+                        key={`${color}-${i}`}
+                        onClick={() => theme === 'light' ? setBgColor(color) : setDarkBgColor(color)}
+                        className={`w-6 h-6 rounded-md flex-shrink-0 transition-all duration-150 hover:scale-110 active:scale-95 ring-1 ring-white/[0.08] ${
+                          (theme === 'light' ? bgColor : darkBgColor) === color 
+                            ? 'ring-2 ring-[#0066ff] ring-offset-1 ring-offset-[#27272a]' 
+                            : ''
+                        }`}
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Logo Scale */}
           <div>
@@ -217,7 +227,42 @@ export const Sidebar = () => {
             />
           </div>
 
-          {/* Safe Area Toggle */}
+          {/* Splash Advanced Settings */}
+          {assetType === 'splash' && (
+            <div className="pt-2 space-y-4 border-t border-[#27272a]">
+              <div>
+                <SectionTitle>Resize Mode</SectionTitle>
+                <select 
+                  value={splashResizeMode}
+                  onChange={(e) => setSplashResizeMode(e.target.value as any)}
+                  className="w-full bg-[#27272a] border border-[#3f3f46] rounded-lg px-3 py-2 text-[12px] text-[#fafafa] focus:outline-none"
+                >
+                  <option value="contain">Contain</option>
+                  <option value="cover">Cover</option>
+                  <option value="native">Native</option>
+                </select>
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <SectionTitle className="mb-0">Image Width (SDK 50+)</SectionTitle>
+                  <span className="text-[11px] font-mono font-semibold text-[#0066ff] bg-[#0066ff]/10 px-2 py-0.5 rounded-md">
+                    {splashImageWidth}px
+                  </span>
+                </div>
+                <input 
+                  type="range" 
+                  min="50" 
+                  max="800" 
+                  step="10"
+                  value={splashImageWidth}
+                  onChange={(e) => setSplashImageWidth(parseInt(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Preview Overlay */}
           <div>
             <SectionTitle>Preview</SectionTitle>
             <button 
@@ -280,3 +325,4 @@ export const Sidebar = () => {
     </aside>
   );
 };
+
