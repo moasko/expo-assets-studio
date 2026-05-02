@@ -54,8 +54,10 @@ export const ScreenshotPreview = ({ screenshotId }: { screenshotId?: string }) =
       }}
     >
       {/* Device shadow */}
-      <div className="absolute inset-0 translate-y-4 blur-3xl opacity-30 rounded-[40px]" 
-           style={{ background: 'rgba(0,0,0,0.6)' }} />
+      {activeScreenshot.showShadow && (
+        <div className="absolute inset-0 translate-y-8 blur-3xl opacity-50 rounded-[40px]" 
+             style={{ background: 'rgba(0,0,0,0.8)' }} />
+      )}
       
       {/* Device frame */}
       <div className={`relative bg-[#1a1a1a] shadow-2xl overflow-hidden ${
@@ -69,14 +71,19 @@ export const ScreenshotPreview = ({ screenshotId }: { screenshotId?: string }) =
           isIOS ? 'rounded-[28px]' : 'rounded-[22px]'
         }`}>
           {/* Status Bar */}
-          <div className="absolute top-0 w-full h-10 flex items-end justify-between px-6 pb-1.5 z-20">
-            <span className="text-[9px] font-semibold text-white/95 tabular-nums tracking-tight">{timeStr}</span>
-            <div className="flex items-center gap-1">
-              <Signal size={10} className="text-white/80" />
-              <Wifi size={11} className="text-white/80" />
-              <Battery size={12} className="text-white/80" />
+          {activeScreenshot.showStatusBar && (
+            <div className="absolute top-0 w-full h-10 flex items-end justify-between px-6 pb-1.5 z-20">
+              <span className="text-[9px] font-semibold text-white/95 tabular-nums tracking-tight">{activeScreenshot.statusTime}</span>
+              <div className="flex items-center gap-1.5">
+                <Signal size={10} className="text-white/80" />
+                <Wifi size={11} className="text-white/80" />
+                <div className="flex items-center gap-1">
+                  <span className="text-[8px] font-medium text-white/70">{activeScreenshot.statusBattery}%</span>
+                  <Battery size={11} className="text-white/80" />
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Dynamic Island (iOS) */}
           {isIOS && (
@@ -121,6 +128,11 @@ export const ScreenshotPreview = ({ screenshotId }: { screenshotId?: string }) =
               <div className="w-4 h-4 border-2 border-white/15 rounded-full" />
               <div className="w-4 h-1.5 border-2 border-white/15 rounded-full mt-1" />
             </div>
+          )}
+
+          {/* Glass Reflection Overlay */}
+          {activeScreenshot.showReflection && (
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.05] to-white/[0.15] pointer-events-none z-40" />
           )}
         </div>
       </div>
