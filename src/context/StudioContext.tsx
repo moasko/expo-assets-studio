@@ -56,6 +56,7 @@ interface StudioContextType {
   handleBgImageUpload: (e: ChangeEvent<HTMLInputElement>) => void;
   applyScreenshotToAll: () => void;
   applyBgToAll: () => void;
+  applyTemplate: (templateId: string) => void;
   exportScreenshot: (id: string) => Promise<void>;
   exportAllScreenshots: () => Promise<void>;
 }
@@ -81,6 +82,11 @@ const createNewScreenshot = (id: string): ScreenshotConfig => ({
   showTitle: true,
   showSubtitle: true,
   fontFamily: 'Inter',
+  statusTime: '9:41',
+  statusBattery: 100,
+  showStatusBar: true,
+  showReflection: false,
+  showShadow: true,
   bgImageUrl: null
 });
 
@@ -279,6 +285,64 @@ export const StudioProvider = ({ children }: { children: ReactNode }) => {
     if (!active || !active.bgImageUrl) return;
     setScreenshots(prev => prev.map(s => ({ ...s, bgImageUrl: active.bgImageUrl })));
     notify("Background image applied to all slides");
+  };
+
+  const applyTemplate = (templateId: string) => {
+    let config: Partial<ScreenshotConfig> = {};
+    
+    switch (templateId) {
+      case 'minimal':
+        config = {
+          layout: 'center',
+          deviceScale: 80,
+          deviceRotation: 0,
+          deviceOffsetX: 0,
+          deviceOffsetY: 0,
+          bgGradient: 'linear-gradient(135deg, #18181b 0%, #3f3f46 100%)',
+          titleColor: '#ffffff',
+          subtitleColor: '#a1a1aa'
+        };
+        break;
+      case 'leaning':
+        config = {
+          layout: 'center',
+          deviceScale: 100,
+          deviceRotation: -15,
+          deviceOffsetX: 40,
+          deviceOffsetY: 20,
+          bgGradient: 'linear-gradient(135deg, #0066ff 0%, #0044aa 100%)',
+          titleColor: '#ffffff',
+          subtitleColor: '#ffffff'
+        };
+        break;
+      case 'focus':
+        config = {
+          layout: 'bottom',
+          deviceScale: 150,
+          deviceRotation: 5,
+          deviceOffsetX: 0,
+          deviceOffsetY: 100,
+          bgGradient: 'linear-gradient(135deg, #7c3aed 0%, #2563eb 100%)',
+          titleColor: '#ffffff',
+          subtitleColor: '#e0e0e0'
+        };
+        break;
+      case '3d':
+        config = {
+          layout: 'center',
+          deviceScale: 110,
+          deviceRotation: 25,
+          deviceOffsetX: -50,
+          deviceOffsetY: -20,
+          bgGradient: 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)',
+          titleColor: '#ffffff',
+          subtitleColor: '#ffffff'
+        };
+        break;
+    }
+    
+    updateScreenshotConfig(config);
+    notify(`Template "${templateId}" applied`);
   };
 
   const resetStudio = () => {
@@ -536,7 +600,7 @@ export const StudioProvider = ({ children }: { children: ReactNode }) => {
       isDragging, setIsDragging, handleFileDrop,
       screenshots, activeScreenshotId, setActiveScreenshotId, addScreenshot, removeScreenshot, duplicateScreenshot,
       updateScreenshotConfig, syncAllScreenshots, handleScreenshotUpload, handleBgImageUpload, 
-      applyScreenshotToAll, applyBgToAll, exportScreenshot, exportAllScreenshots
+      applyScreenshotToAll, applyBgToAll, applyTemplate, exportScreenshot, exportAllScreenshots
     }}>
       {children}
     </StudioContext.Provider>
