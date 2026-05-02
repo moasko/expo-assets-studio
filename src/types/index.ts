@@ -27,6 +27,11 @@ export interface ScreenshotConfig {
   showSubtitle: boolean;
   fontFamily: string;
   bgImageUrl: string | null;
+  statusTime: string;
+  statusBattery: number;
+  showStatusBar: boolean;
+  showReflection: boolean;
+  showShadow: boolean;
 }
 
 
