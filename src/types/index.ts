@@ -7,6 +7,26 @@ export type Device = 'ios' | 'android' | 'web';
 export type SplashResizeMode = 'contain' | 'cover' | 'native';
 export type AndroidMask = 'circle' | 'squircle' | 'rounded-rect' | 'teardrop';
 
+export interface AssetConfig {
+  bgColor: string;
+  bgGradient: string;
+  useGradient: boolean;
+  logoScale: number;
+  logoX: number;
+  logoY: number;
+  logoRotation: number;
+  // Effects
+  showShadow: boolean;
+  shadowColor: string;
+  shadowBlur: number;
+  shadowX: number;
+  shadowY: number;
+  showBevel: boolean;
+  showScore: boolean;
+  scoreColor: string;
+  scoreOpacity: number;
+}
+
 export interface ScreenshotConfig {
   id: string;
   title: string;
@@ -33,6 +53,7 @@ export interface ScreenshotConfig {
   showReflection: boolean;
   showShadow: boolean;
 }
+
 
 
 

@@ -15,10 +15,39 @@ interface StudioContextType {
   setBgColor: (color: string) => void;
   darkBgColor: string;
   setDarkBgColor: (color: string) => void;
+  bgGradient: string;
+  setBgGradient: (gradient: string) => void;
+  useGradient: boolean;
+  setUseGradient: (use: boolean) => void;
   theme: Theme;
   setTheme: (theme: Theme) => void;
   logoScale: number;
   setLogoScale: (scale: number) => void;
+  logoX: number;
+  setLogoX: (x: number) => void;
+  logoY: number;
+  setLogoY: (y: number) => void;
+  logoRotation: number;
+  setLogoRotation: (rot: number) => void;
+  // Effects
+  showShadow: boolean;
+  setShowShadow: (show: boolean) => void;
+  shadowColor: string;
+  setShadowColor: (color: string) => void;
+  shadowBlur: number;
+  setShadowBlur: (blur: number) => void;
+  shadowX: number;
+  setShadowX: (x: number) => void;
+  shadowY: number;
+  setShadowY: (y: number) => void;
+  showBevel: boolean;
+  setShowBevel: (show: boolean) => void;
+  showScore: boolean;
+  setShowScore: (show: boolean) => void;
+  scoreColor: string;
+  setScoreColor: (color: string) => void;
+  scoreOpacity: number;
+  setScoreOpacity: (op: number) => void;
   splashResizeMode: SplashResizeMode;
   setSplashResizeMode: (mode: SplashResizeMode) => void;
   splashImageWidth: number;
@@ -59,6 +88,8 @@ interface StudioContextType {
   applyTemplate: (templateId: string) => void;
   exportScreenshot: (id: string) => Promise<void>;
   exportAllScreenshots: () => Promise<void>;
+  canvasZoom: number;
+  setCanvasZoom: (zoom: number) => void;
 }
 
 const StudioContext = createContext<StudioContextType | undefined>(undefined);
@@ -96,8 +127,25 @@ export const StudioProvider = ({ children }: { children: ReactNode }) => {
   const [assetType, setAssetType] = useState<AssetType>('icon');
   const [bgColor, setBgColor] = useState('#ffffff');
   const [darkBgColor, setDarkBgColor] = useState('#000000');
+  const [bgGradient, setBgGradient] = useState('linear-gradient(135deg, #6366f1 0%, #a855f7 100%)');
+  const [useGradient, setUseGradient] = useState(false);
   const [theme, setTheme] = useState<Theme>('light');
   const [logoScale, setLogoScale] = useState(60);
+  const [logoX, setLogoX] = useState(0);
+  const [logoY, setLogoY] = useState(0);
+  const [logoRotation, setLogoRotation] = useState(0);
+  
+  // Effects
+  const [showShadow, setShowShadow] = useState(false);
+  const [shadowColor, setShadowColor] = useState('rgba(0,0,0,0.3)');
+  const [shadowBlur, setShadowBlur] = useState(10);
+  const [shadowX, setShadowX] = useState(0);
+  const [shadowY, setShadowY] = useState(5);
+  const [showBevel, setShowBevel] = useState(false);
+  const [showScore, setShowScore] = useState(false);
+  const [scoreColor, setScoreColor] = useState('rgba(255,255,255,0.2)');
+  const [scoreOpacity, setScoreOpacity] = useState(0.5);
+
   const [splashResizeMode, setSplashResizeMode] = useState<SplashResizeMode>('contain');
   const [splashImageWidth, setSplashImageWidth] = useState(200);
   const [androidMask, setAndroidMask] = useState<AndroidMask>('circle');
@@ -108,6 +156,8 @@ export const StudioProvider = ({ children }: { children: ReactNode }) => {
   const [notification, setNotification] = useState<Notification | null>(null);
   const [suggestedColors, setSuggestedColors] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [canvasZoom, setCanvasZoom] = useState(100);
+
 
   // Screenshot state
   const [screenshots, setScreenshots] = useState<ScreenshotConfig[]>([createNewScreenshot(Date.now().toString())]);
@@ -377,22 +427,73 @@ export const StudioProvider = ({ children }: { children: ReactNode }) => {
 
       const needsBackground = !['adaptive-foreground', 'notification', 'monochrome'].includes(type);
       if (needsBackground) {
-        ctx.fillStyle = isDark ? darkBgColor : bgColor;
+        if (useGradient) {
+          const gradient = ctx.createLinearGradient(0, 0, size, size);
+          // Try to extract colors from the linear-gradient string
+          const colors = bgGradient.match(/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}|rgba?\([^)]+\)/g);
+          if (colors && colors.length >= 2) {
+            gradient.addColorStop(0, colors[0]);
+            gradient.addColorStop(1, colors[colors.length - 1]);
+          } else {
+            gradient.addColorStop(0, '#6366f1');
+            gradient.addColorStop(1, '#a855f7');
+          }
+          ctx.fillStyle = gradient;
+        } else {
+          ctx.fillStyle = isDark ? darkBgColor : bgColor;
+        }
         ctx.fillRect(0, 0, size, size);
+      }
+
+      // Render Score Lines
+      if (showScore) {
+        ctx.strokeStyle = scoreColor;
+        ctx.globalAlpha = scoreOpacity;
+        ctx.lineWidth = size / 200;
+        
+        // Horizontal
+        ctx.beginPath();
+        ctx.moveTo(0, size * 0.25); ctx.lineTo(size, size * 0.25);
+        ctx.moveTo(0, size * 0.5); ctx.lineTo(size, size * 0.5);
+        ctx.moveTo(0, size * 0.75); ctx.lineTo(size, size * 0.75);
+        ctx.stroke();
+
+        // Vertical
+        ctx.beginPath();
+        ctx.moveTo(size * 0.25, 0); ctx.lineTo(size * 0.25, size);
+        ctx.moveTo(size * 0.5, 0); ctx.lineTo(size * 0.5, size);
+        ctx.moveTo(size * 0.75, 0); ctx.lineTo(size * 0.75, size);
+        ctx.stroke();
+        
+        ctx.globalAlpha = 1.0;
       }
 
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.onload = () => {
+        ctx.save();
+        
         const scale = logoScale / 100;
         const drawWidth = size * scale;
         const imgWidth = img.width || size;
         const imgHeight = img.height || size;
         const drawHeight = (imgHeight / imgWidth) * drawWidth;
-        const x = (size - drawWidth) / 2;
-        const y = (size - drawHeight) / 2;
+        
+        const centerX = size / 2 + (logoX / 100) * size;
+        const centerY = size / 2 + (logoY / 100) * size;
 
-        ctx.drawImage(img, x, y, drawWidth, drawHeight);
+        ctx.translate(centerX, centerY);
+        ctx.rotate((logoRotation * Math.PI) / 180);
+
+        if (showShadow) {
+          ctx.shadowColor = shadowColor;
+          ctx.shadowBlur = (shadowBlur / 100) * size;
+          ctx.shadowOffsetX = (shadowX / 100) * size;
+          ctx.shadowOffsetY = (shadowY / 100) * size;
+        }
+
+        ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+        ctx.restore();
 
         if (type === 'monochrome') {
           const imageData = ctx.getImageData(0, 0, size, size);
@@ -417,6 +518,7 @@ export const StudioProvider = ({ children }: { children: ReactNode }) => {
       img.src = logoUrl;
     });
   };
+
 
   const downloadSingle = async (isDark: boolean) => {
     const blob = await generateAssetBlob(assetType, isDark);
@@ -591,7 +693,10 @@ export const StudioProvider = ({ children }: { children: ReactNode }) => {
     <StudioContext.Provider value={{
       appMode, setAppMode,
       logoUrl, setLogoUrl, assetType, setAssetType, bgColor, setBgColor,
-      darkBgColor, setDarkBgColor, theme, setTheme, logoScale, setLogoScale,
+      darkBgColor, setDarkBgColor, bgGradient, setBgGradient, useGradient, setUseGradient,
+      theme, setTheme, logoScale, setLogoScale, logoX, setLogoX, logoY, setLogoY, logoRotation, setLogoRotation,
+      showShadow, setShowShadow, shadowColor, setShadowColor, shadowBlur, setShadowBlur, shadowX, setShadowX, shadowY, setShadowY,
+      showBevel, setShowBevel, showScore, setShowScore, scoreColor, setScoreColor, scoreOpacity, setScoreOpacity,
       splashResizeMode, setSplashResizeMode, splashImageWidth, setSplashImageWidth,
       androidMask, setAndroidMask,
       previewDevice, setPreviewDevice, showSafeArea, setShowSafeArea,
@@ -600,7 +705,8 @@ export const StudioProvider = ({ children }: { children: ReactNode }) => {
       isDragging, setIsDragging, handleFileDrop,
       screenshots, activeScreenshotId, setActiveScreenshotId, addScreenshot, removeScreenshot, duplicateScreenshot,
       updateScreenshotConfig, syncAllScreenshots, handleScreenshotUpload, handleBgImageUpload, 
-      applyScreenshotToAll, applyBgToAll, applyTemplate, exportScreenshot, exportAllScreenshots
+      applyScreenshotToAll, applyBgToAll, applyTemplate, exportScreenshot, exportAllScreenshots,
+      canvasZoom, setCanvasZoom
     }}>
       {children}
     </StudioContext.Provider>

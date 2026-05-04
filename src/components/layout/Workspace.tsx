@@ -1,5 +1,5 @@
 import { useRef, WheelEvent } from 'react';
-import { Grid3x3, Apple, Smartphone, FileImage, Upload, Layers } from 'lucide-react';
+import { Grid3x3, Apple, Smartphone, FileImage, Upload, Search, ZoomIn, ZoomOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStudio } from '../../context/StudioContext';
 import { MockupPreview } from '../features/MockupPreview';
@@ -23,13 +23,14 @@ export const Workspace = () => {
     activeScreenshotId,
     setActiveScreenshotId,
     addScreenshot,
-    updateScreenshotConfig
+    updateScreenshotConfig,
+    canvasZoom,
+    setCanvasZoom
   } = useStudio();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleWheel = (e: WheelEvent) => {
     if (appMode === 'screenshots' && scrollContainerRef.current) {
-      // If scrolling vertically, move horizontally
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         scrollContainerRef.current.scrollLeft += e.deltaY;
       }
@@ -44,7 +45,7 @@ export const Workspace = () => {
     <main className="flex-1 bg-[#09090b] overflow-hidden flex flex-col relative">
       {/* ── Toolbar ── */}
       <div className="h-11 bg-[#18181b]/80 backdrop-blur-md border-b border-[#27272a] flex items-center justify-between px-5 sticky top-0 z-50">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
             <Grid3x3 size={13} className="text-[#71717a]" />
             <span className="text-[12px] font-medium text-[#a1a1aa]">
@@ -65,9 +66,34 @@ export const Workspace = () => {
               </span>
             </div>
           )}
-          <div className="flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
-            <span className="text-[11px] text-[#71717a] font-medium">Live</span>
+
+          {/* Canvas Zoom Controls */}
+          <div className="flex items-center gap-3 border-l border-[#27272a] pl-6 ml-2">
+             <button 
+              onClick={() => setCanvasZoom(Math.max(25, canvasZoom - 10))}
+              className="text-[#71717a] hover:text-[#fafafa] transition-colors"
+             >
+               <ZoomOut size={14} />
+             </button>
+             <div className="flex items-center gap-2">
+               <input 
+                type="range" 
+                min="25" 
+                max="200" 
+                value={canvasZoom}
+                onChange={(e) => setCanvasZoom(parseInt(e.target.value))}
+                className="w-24 h-1 bg-[#27272a] rounded-full appearance-none accent-[#0066ff] cursor-pointer"
+               />
+               <span className="text-[10px] font-mono font-semibold text-[#0066ff] w-10">
+                 {canvasZoom}%
+               </span>
+             </div>
+             <button 
+              onClick={() => setCanvasZoom(Math.min(200, canvasZoom + 10))}
+              className="text-[#71717a] hover:text-[#fafafa] transition-colors"
+             >
+               <ZoomIn size={14} />
+             </button>
           </div>
         </div>
 
@@ -149,12 +175,17 @@ export const Workspace = () => {
             ) : (
               <motion.div
                 key="preview-assets"
-                initial={{ opacity: 0, scale: 0.97 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.97 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
                 className="flex flex-col items-center relative z-10"
               >
-                <MockupPreview />
+                <div 
+                  className="transition-transform duration-300 origin-center"
+                  style={{ transform: `scale(${canvasZoom / 100})` }}
+                >
+                  <MockupPreview />
+                </div>
               </motion.div>
             )
           ) : (
@@ -165,43 +196,46 @@ export const Workspace = () => {
               exit={{ opacity: 0 }}
               className="relative z-10 w-full h-full flex items-center"
             >
-              <div className="flex flex-nowrap items-center gap-2 px-20 py-10 min-w-full">
-                {screenshots.map((s, idx) => (
-                  <div 
-                    key={s.id}
-                    onClick={() => setActiveScreenshotId(s.id)}
-                    className={`relative shrink-0 transition-all duration-300 cursor-pointer group ${
-                      s.id === activeScreenshotId 
-                      ? 'z-20' 
-                      : 'opacity-80 hover:opacity-100 hover:scale-[1.01]'
-                    }`}
-                  >
-                    {/* Selection Indicator */}
-                    {s.id === activeScreenshotId && (
-                      <div className="absolute -inset-1 border-2 border-orange-500 rounded-[18px] pointer-events-none z-30" />
-                    )}
-                    
-                    <div className="w-[280px] aspect-[9/19.5] rounded-2xl overflow-hidden shadow-2xl shadow-black/60 ring-1 ring-white/[0.06]">
-                      {/* We need to pass the specific screenshot to Preview if it's not active, 
-                          but currently ScreenshotPreview uses context. 
-                          I'll refactor ScreenshotPreview to accept an optional screenshot prop. */}
-                      <ScreenshotPreview screenshotId={s.id} />
+              <div 
+                className="transition-transform duration-300 origin-center w-full"
+                style={{ transform: `scale(${canvasZoom / 100})` }}
+              >
+                <div className="flex flex-nowrap items-center gap-2 px-20 py-10 min-w-full">
+                  {screenshots.map((s, idx) => (
+                    <div 
+                      key={s.id}
+                      onClick={() => setActiveScreenshotId(s.id)}
+                      className={`relative shrink-0 transition-all duration-300 cursor-pointer group ${
+                        s.id === activeScreenshotId 
+                        ? 'z-20' 
+                        : 'opacity-80 hover:opacity-100 hover:scale-[1.01]'
+                      }`}
+                    >
+                      {/* Selection Indicator */}
+                      {s.id === activeScreenshotId && (
+                        <div className="absolute -inset-1 border-2 border-orange-500 rounded-[18px] pointer-events-none z-30" />
+                      )}
+                      
+                      <div className="w-[280px] aspect-[9/19.5] rounded-2xl overflow-hidden shadow-2xl shadow-black/60 ring-1 ring-white/[0.06]">
+                        <ScreenshotPreview screenshotId={s.id} />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
-                {/* Add New Slide Button */}
-                <button 
-                  onClick={addScreenshot}
-                  className="w-[280px] aspect-[9/19.5] shrink-0 rounded-2xl border-2 border-dashed border-[#27272a] bg-[#18181b]/30 hover:bg-[#18181b]/50 hover:border-[#3f3f46] transition-all duration-200 flex flex-col items-center justify-center gap-4 text-[#52525b] hover:text-[#71717a] group"
-                >
-                  <div className="w-16 h-16 rounded-full bg-[#27272a]/50 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                    <Upload size={24} strokeWidth={1.5} className="rotate-45" />
-                  </div>
-                  <span className="text-[13px] font-semibold">Add New Slide</span>
-                </button>
+                  {/* Add New Slide Button */}
+                  <button 
+                    onClick={addScreenshot}
+                    className="w-[280px] aspect-[9/19.5] shrink-0 rounded-2xl border-2 border-dashed border-[#27272a] bg-[#18181b]/30 hover:bg-[#18181b]/50 hover:border-[#3f3f46] transition-all duration-200 flex flex-col items-center justify-center gap-4 text-[#52525b] hover:text-[#71717a] group"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-[#27272a]/50 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                      <Upload size={24} strokeWidth={1.5} className="rotate-45" />
+                    </div>
+                    <span className="text-[13px] font-semibold">Add New Slide</span>
+                  </button>
+                </div>
               </div>
             </motion.div>
+
           )}
         </AnimatePresence>
       </div>

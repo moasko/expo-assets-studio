@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useStudio } from '../../context/StudioContext';
 import { Wifi, Battery, Signal } from 'lucide-react';
+import iphoneMockup from '@/assets/iphone17.png';
 
 export const ScreenshotPreview = ({ screenshotId }: { screenshotId?: string }) => {
   const { screenshots, activeScreenshotId } = useStudio();
@@ -11,8 +12,7 @@ export const ScreenshotPreview = ({ screenshotId }: { screenshotId?: string }) =
   
   const isIOS = activeScreenshot.deviceType === 'ios';
 
-  const now = useMemo(() => new Date(), []);
-  const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+
 
   const textContent = (
     <div className={`flex flex-col gap-3 px-8 ${activeScreenshot.layout === 'center' ? 'text-center items-center' : 'text-center items-center'}`}>
@@ -60,20 +60,22 @@ export const ScreenshotPreview = ({ screenshotId }: { screenshotId?: string }) =
       )}
       
       {/* Device frame */}
-      <div className={`relative bg-[#1a1a1a] shadow-2xl overflow-hidden ${
-        isIOS ? 'rounded-[36px] p-[8px]' : 'rounded-[28px] p-[6px]'
+      <div className={`relative shadow-2xl overflow-hidden ${
+        isIOS ? 'rounded-[38px] p-[6px]' : 'bg-[#1a1a1a] rounded-[28px] p-[6px]'
       }`}>
+        {isIOS && (
+          <img src={iphoneMockup} className="absolute inset-0 w-full h-full object-fill z-30 pointer-events-none" alt="iPhone Frame" />
+        )}
         {/* Inner bezel highlight */}
         <div className="absolute inset-[1px] rounded-[inherit] border border-white/[0.08] pointer-events-none z-20" />
         
         {/* Screen */}
         <div className={`relative bg-[#000] overflow-hidden aspect-[9/19.5] ${
-          isIOS ? 'rounded-[28px]' : 'rounded-[22px]'
+          isIOS ? 'rounded-[32px]' : 'rounded-[22px]'
         }`}>
           {/* Status Bar */}
           {activeScreenshot.showStatusBar && (
-            <div className="absolute top-0 w-full h-10 flex items-end justify-between px-6 pb-1.5 z-20">
-              <span className="text-[9px] font-semibold text-white/95 tabular-nums tracking-tight">{activeScreenshot.statusTime}</span>
+            <div className="absolute top-0 w-full h-10 flex items-end justify-end px-6 pb-1.5 z-20">
               <div className="flex items-center gap-1.5">
                 <Signal size={10} className="text-white/80" />
                 <Wifi size={11} className="text-white/80" />
@@ -82,13 +84,6 @@ export const ScreenshotPreview = ({ screenshotId }: { screenshotId?: string }) =
                   <Battery size={11} className="text-white/80" />
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Dynamic Island (iOS) */}
-          {isIOS && (
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[75px] h-[22px] bg-black rounded-full z-30 flex items-center justify-center">
-              <div className="w-1.5 h-1.5 bg-[#1a1a1c] rounded-full border border-[#2a2a2c] ml-6" />
             </div>
           )}
 

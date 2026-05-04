@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { 
-  Smartphone, Mail, Globe, Music, Camera, Calendar, Settings, 
-  Wifi, Battery, Search, ArrowLeft, MoreHorizontal, Bell 
+import {
+  Smartphone, Mail, Globe, Music, Camera, Calendar, Settings,
+  Wifi, Battery, Search, ArrowLeft, MoreHorizontal, Bell
 } from 'lucide-react';
+import iphoneMockup from '@/assets/iphone17.png';
 import { useStudio } from '../../context/StudioContext';
 import { AndroidMask } from '../../types';
 
@@ -44,7 +45,21 @@ export const MockupPreview = () => {
     theme,
     bgColor,
     darkBgColor,
+    bgGradient,
+    useGradient,
     logoScale,
+    logoX,
+    logoY,
+    logoRotation,
+    showShadow,
+    shadowColor,
+    shadowBlur,
+    shadowX,
+    shadowY,
+    showBevel,
+    showScore,
+    scoreColor,
+    scoreOpacity,
     showSafeArea,
     androidMask,
     splashResizeMode,
@@ -55,31 +70,71 @@ export const MockupPreview = () => {
 
   const isIOS = previewDevice === 'ios';
   const currentBg = theme === 'light' ? bgColor : darkBgColor;
-  const now = new Date();
-  const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+  const renderScoreLines = () => {
+    if (!showScore) return null;
+    return (
+      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30" style={{ color: scoreColor }}>
+        {/* Horizontal lines */}
+        <div className="absolute top-1/4 w-full h-[1px] bg-current" />
+        <div className="absolute top-1/2 w-full h-[1px] bg-current" />
+        <div className="absolute top-3/4 w-full h-[1px] bg-current" />
+        {/* Vertical lines */}
+        <div className="absolute left-1/4 h-full w-[1px] bg-current" />
+        <div className="absolute left-1/2 h-full w-[1px] bg-current" />
+        <div className="absolute left-3/4 h-full w-[1px] bg-current" />
+        {/* Diagonal lines */}
+        <div className="absolute inset-0 border border-current rounded-full scale-[0.707]" />
+      </div>
+    );
+  };
 
   const renderIconContent = () => {
     const isMonochrome = assetType === 'monochrome';
     const isNotification = assetType === 'notification';
+    const isAdaptiveBack = assetType === 'adaptive-background';
     
+    const backgroundStyle = (isMonochrome || isNotification) 
+      ? { backgroundColor: '#27272a' }
+      : useGradient 
+        ? { backgroundImage: bgGradient }
+        : { backgroundColor: currentBg };
+
     return (
       <div
-        className={`w-full aspect-square shadow-2xl overflow-hidden flex items-center justify-center transition-all duration-500 relative ${
-          isIOS ? 'rounded-[22%]' : MASK_CLASSES[androidMask]
-        }`}
-        style={{ 
-          backgroundColor: (isMonochrome || isNotification) ? '#27272a' : currentBg,
+        className={`w-full aspect-square shadow-2xl overflow-hidden flex items-center justify-center transition-all duration-500 relative ${isIOS ? 'rounded-[22%]' : MASK_CLASSES[androidMask]
+          }`}
+        style={{
+          ...backgroundStyle,
           filter: isMonochrome ? 'grayscale(1)' : 'none'
         }}
       >
-        <img
-          src={logoUrl || ""}
-          className={`object-contain z-10 drop-shadow-sm ${isNotification ? 'brightness-0 invert' : ''}`}
-          style={{ width: `${logoScale}%`, height: `${logoScale}%` }}
-          alt="Logo"
-        />
+        {renderScoreLines()}
+
+        {!isAdaptiveBack && (
+          <div 
+            className="relative z-10 transition-all duration-300 ease-out"
+            style={{
+              width: `${logoScale}%`,
+              height: `${logoScale}%`,
+              transform: `translate(${logoX}%, ${logoY}%) rotate(${logoRotation}deg)`,
+              filter: `
+                ${showShadow ? `drop-shadow(${shadowX}px ${shadowY}px ${shadowBlur}px ${shadowColor})` : ''}
+                ${showBevel ? 'contrast(1.1) brightness(1.1) drop-shadow(0 -1px 1px rgba(255,255,255,0.3)) drop-shadow(0 1px 1px rgba(0,0,0,0.3))' : ''}
+                ${isNotification ? 'brightness-0 invert' : ''}
+              `
+            }}
+          >
+            <img
+              src={logoUrl || ""}
+              className="w-full h-full object-contain"
+              alt="Logo"
+            />
+          </div>
+        )}
+        
         {showSafeArea && (
-          <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 pointer-events-none z-20">
             <div className="absolute inset-[10%] border border-[#22c55e]/50 rounded-full" />
             <div className="absolute inset-0 border border-[#22c55e]/20" />
             <div className="absolute top-1/2 left-0 w-full h-[1px] bg-[#22c55e]/20" />
@@ -89,6 +144,7 @@ export const MockupPreview = () => {
       </div>
     );
   };
+
 
   if (previewDevice === 'web' || assetType === 'favicon' || assetType === 'web-icons') {
     return (
@@ -101,14 +157,14 @@ export const MockupPreview = () => {
           </div>
           <div className="flex-1 bg-[#18181b] h-6 rounded-md px-3 flex items-center gap-2">
             <div className="w-3 h-3 rounded-sm overflow-hidden bg-white/10 flex items-center justify-center">
-               <img src={logoUrl || ""} className="w-full h-full object-contain" />
+              <img src={logoUrl || ""} className="w-full h-full object-contain" />
             </div>
             <span className="text-[10px] text-[#71717a] truncate">localhost:3000</span>
           </div>
         </div>
         <div className="h-[300px] bg-[#09090b] flex items-center justify-center flex-col gap-4">
           <div className="w-24 h-24 rounded-2xl bg-[#18181b] border border-[#27272a] flex items-center justify-center p-4">
-             <img src={logoUrl || ""} className="w-full h-full object-contain" style={{ filter: assetType === 'monochrome' ? 'grayscale(1)' : 'none' }} />
+            <img src={logoUrl || ""} className="w-full h-full object-contain" style={{ filter: assetType === 'monochrome' ? 'grayscale(1)' : 'none' }} />
           </div>
           <p className="text-[12px] text-[#a1a1aa] font-medium">Web Preview</p>
         </div>
@@ -120,17 +176,17 @@ export const MockupPreview = () => {
     <div className="relative">
       <div className="absolute inset-0 rounded-[44px] bg-[#0066ff]/[0.04] blur-3xl translate-y-8 scale-[0.9]" />
 
-      <div className={`relative w-[300px] h-[620px] bg-[#0a0a0a] transition-all duration-500 overflow-hidden ${isIOS ? 'rounded-[40px] p-[10px]' : 'rounded-[32px] p-[8px]'
+      <div className={`relative w-[300px] h-[620px] transition-all duration-500 overflow-hidden ${isIOS ? 'rounded-[50px] p-[10px]' : 'bg-[#0a0a0a] rounded-[32px] p-[8px]'
         }`}>
+        {isIOS && (
+          <img src={iphoneMockup} className="absolute inset-0 w-full h-full object-fill z-20 pointer-events-none" alt="iPhone Frame" />
+        )}
+
         <div className="absolute inset-[1px] rounded-[inherit] border border-white/[0.08] pointer-events-none z-10" />
 
-        <div className={`w-full h-full bg-white overflow-hidden relative ${isIOS ? 'rounded-[30px]' : 'rounded-[24px]'
+        <div className={`w-full h-full bg-white overflow-hidden relative ${isIOS ? 'rounded-[40px]' : 'rounded-[24px]'
           }`}>
-          {isIOS ? (
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[100px] h-[28px] bg-black rounded-full z-30 flex items-center justify-center">
-              <div className="w-2.5 h-2.5 bg-[#1a1a1c] rounded-full border border-[#2a2a2c] ml-6" />
-            </div>
-          ) : (
+          {!isIOS && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#2a2a2c] rounded-full z-30 border-2 border-[#1a1a1c]" />
           )}
 
@@ -143,38 +199,16 @@ export const MockupPreview = () => {
               }}>
               <div className="h-12 flex items-end justify-between px-7 pb-1 z-20">
                 <div className="flex items-center gap-2">
-                  <span className="text-[12px] font-semibold text-white/95 tabular-nums drop-shadow-sm">
-                    {timeStr}
-                  </span>
                   {assetType === 'notification' && (
                     <div className="w-4 h-4 brightness-0 invert opacity-90">
-                       <img src={logoUrl || ""} className="w-full h-full object-contain" />
+                      <img src={logoUrl || ""} className="w-full h-full object-contain" />
                     </div>
                   )}
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Wifi size={12} className="text-white/80" />
-                  <Battery size={14} className="text-white/80" />
-                </div>
+
               </div>
 
-              <div className="px-4 pt-5 pb-2">
-                <div className="w-full bg-white/[0.12] backdrop-blur-xl rounded-2xl p-3.5 border border-white/[0.08]">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-white/[0.15] rounded-xl flex items-center justify-center text-white/90">
-                      <Calendar size={17} strokeWidth={1.8} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-medium text-white/60 tracking-wide">
-                        {now.toLocaleDateString('en-US', { weekday: 'long' })}
-                      </p>
-                      <p className="text-[14px] font-semibold text-white/95 leading-tight">
-                        {now.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+
 
               <div className="flex-1 px-5 pt-5">
                 <div className="grid grid-cols-4 gap-x-4 gap-y-6">
@@ -221,12 +255,11 @@ export const MockupPreview = () => {
             >
               <img
                 src={logoUrl || ""}
-                className={`drop-shadow-sm transition-all duration-300 ${
-                  splashResizeMode === 'cover' ? 'w-full h-full object-cover' : 'object-contain'
-                }`}
-                style={{ 
-                   width: splashResizeMode === 'contain' ? `${logoScale}%` : splashResizeMode === 'native' ? `${splashImageWidth}px` : '100%',
-                   height: splashResizeMode === 'contain' ? `${logoScale}%` : splashResizeMode === 'native' ? 'auto' : '100%'
+                className={`drop-shadow-sm transition-all duration-300 ${splashResizeMode === 'cover' ? 'w-full h-full object-cover' : 'object-contain'
+                  }`}
+                style={{
+                  width: splashResizeMode === 'contain' ? `${logoScale}%` : splashResizeMode === 'native' ? `${splashImageWidth}px` : '100%',
+                  height: splashResizeMode === 'contain' ? `${logoScale}%` : splashResizeMode === 'native' ? 'auto' : '100%'
                 }}
                 alt="Splash"
               />

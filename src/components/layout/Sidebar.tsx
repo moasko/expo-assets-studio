@@ -37,8 +37,22 @@ export const Sidebar = () => {
     logoUrl, 
     theme, setTheme, 
     bgColor, setBgColor, 
-    darkBgColor, setDarkBgColor, 
+    darkBgColor, setDarkBgColor,
+    bgGradient, setBgGradient,
+    useGradient, setUseGradient,
     logoScale, setLogoScale, 
+    logoX, setLogoX,
+    logoY, setLogoY,
+    logoRotation, setLogoRotation,
+    showShadow, setShowShadow,
+    shadowColor, setShadowColor,
+    shadowBlur, setShadowBlur,
+    shadowX, setShadowX,
+    shadowY, setShadowY,
+    showBevel, setShowBevel,
+    showScore, setShowScore,
+    scoreColor, setScoreColor,
+    scoreOpacity, setScoreOpacity,
     splashResizeMode, setSplashResizeMode,
     splashImageWidth, setSplashImageWidth,
     showSafeArea, setShowSafeArea, 
@@ -165,67 +179,169 @@ export const Sidebar = () => {
 
           {/* Background Color */}
           {!['adaptive-foreground', 'notification', 'monochrome'].includes(assetType) && (
-            <div>
-              <SectionTitle>Background</SectionTitle>
-              <div className="flex items-center gap-2.5">
-                <div className="relative w-9 h-9 rounded-lg border border-[#3f3f46] overflow-hidden shrink-0 group cursor-pointer">
-                  <input 
-                    type="color" 
-                    value={theme === 'light' ? bgColor : darkBgColor}
-                    onChange={(e) => theme === 'light' ? setBgColor(e.target.value) : setDarkBgColor(e.target.value)}
-                    className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer"
-                  />
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                   <SectionTitle className="mb-0">Background</SectionTitle>
+                   <button 
+                    onClick={() => setUseGradient(!useGradient)}
+                    className={`text-[10px] px-2 py-0.5 rounded-md transition-colors ${useGradient ? 'bg-[#0066ff] text-white' : 'bg-[#27272a] text-[#71717a]'}`}
+                   >
+                    Gradient
+                   </button>
                 </div>
-                <div className="flex-1 relative">
-                  <input 
-                    type="text" 
-                    value={theme === 'light' ? bgColor : darkBgColor}
-                    onChange={(e) => theme === 'light' ? setBgColor(e.target.value) : setDarkBgColor(e.target.value)}
-                    className="w-full bg-[#27272a] border border-[#3f3f46] rounded-lg px-3 py-2 text-[12px] font-mono font-medium text-[#fafafa] focus:ring-2 focus:ring-[#0066ff]/25 focus:border-[#0066ff]/40 focus:outline-none uppercase transition-all"
-                  />
-                </div>
-              </div>
-
-              {suggestedColors.length > 0 && (
-                <div className="flex items-center gap-2 mt-3 p-2.5 bg-[#27272a] rounded-lg">
-                  <Palette size={12} className="text-[#71717a] shrink-0" />
-                  <div className="flex gap-1.5 flex-1">
-                    {suggestedColors.map((color, i) => (
-                      <button
-                        key={`${color}-${i}`}
-                        onClick={() => theme === 'light' ? setBgColor(color) : setDarkBgColor(color)}
-                        className={`w-6 h-6 rounded-md flex-shrink-0 transition-all duration-150 hover:scale-110 active:scale-95 ring-1 ring-white/[0.08] ${
-                          (theme === 'light' ? bgColor : darkBgColor) === color 
-                            ? 'ring-2 ring-[#0066ff] ring-offset-1 ring-offset-[#27272a]' 
-                            : ''
-                        }`}
-                        style={{ backgroundColor: color }}
-                        title={color}
-                      />
-                    ))}
+                
+                {useGradient ? (
+                  <div className="space-y-2">
+                    <input 
+                      type="text" 
+                      value={bgGradient}
+                      onChange={(e) => setBgGradient(e.target.value)}
+                      className="w-full bg-[#27272a] border border-[#3f3f46] rounded-lg px-3 py-2 text-[12px] font-mono text-[#fafafa] focus:outline-none"
+                    />
+                    <div className="flex gap-1.5 overflow-x-auto pb-1">
+                      {[
+                        'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                        'linear-gradient(135deg, #f97316 0%, #ef4444 100%)',
+                        'linear-gradient(135deg, #22c55e 0%, #10b981 100%)',
+                        'linear-gradient(135deg, #0066ff 0%, #00d2ff 100%)',
+                      ].map((g, i) => (
+                        <button 
+                          key={i} 
+                          onClick={() => setBgGradient(g)}
+                          className="w-8 h-8 rounded-md shrink-0 border border-white/10" 
+                          style={{ backgroundImage: g }} 
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2.5">
+                      <div className="relative w-9 h-9 rounded-lg border border-[#3f3f46] overflow-hidden shrink-0 group cursor-pointer">
+                        <input 
+                          type="color" 
+                          value={theme === 'light' ? bgColor : darkBgColor}
+                          onChange={(e) => theme === 'light' ? setBgColor(e.target.value) : setDarkBgColor(e.target.value)}
+                          className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer"
+                        />
+                      </div>
+                      <div className="flex-1 relative">
+                        <input 
+                          type="text" 
+                          value={theme === 'light' ? bgColor : darkBgColor}
+                          onChange={(e) => theme === 'light' ? setBgColor(e.target.value) : setDarkBgColor(e.target.value)}
+                          className="w-full bg-[#27272a] border border-[#3f3f46] rounded-lg px-3 py-2 text-[12px] font-mono font-medium text-[#fafafa] focus:ring-2 focus:ring-[#0066ff]/25 focus:border-[#0066ff]/40 focus:outline-none uppercase transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    {suggestedColors.length > 0 && (
+                      <div className="flex items-center gap-2 mt-3 p-2.5 bg-[#27272a] rounded-lg">
+                        <Palette size={12} className="text-[#71717a] shrink-0" />
+                        <div className="flex gap-1.5 flex-1">
+                          {suggestedColors.map((color, i) => (
+                            <button
+                              key={`${color}-${i}`}
+                              onClick={() => theme === 'light' ? setBgColor(color) : setDarkBgColor(color)}
+                              className={`w-6 h-6 rounded-md flex-shrink-0 transition-all duration-150 hover:scale-110 active:scale-95 ring-1 ring-white/[0.08] ${
+                                (theme === 'light' ? bgColor : darkBgColor) === color 
+                                  ? 'ring-2 ring-[#0066ff] ring-offset-1 ring-offset-[#27272a]' 
+                                  : ''
+                              }`}
+                              style={{ backgroundColor: color }}
+                              title={color}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           )}
 
-          {/* Logo Scale */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <SectionTitle className="mb-0">Logo scale</SectionTitle>
-              <span className="text-[11px] font-mono font-semibold text-[#0066ff] bg-[#0066ff]/10 px-2 py-0.5 rounded-md tabular-nums">
-                {logoScale}%
-              </span>
+          {/* Logo Transform */}
+          <div className="space-y-4 pt-2 border-t border-[#27272a]">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <SectionTitle className="mb-0">Scale</SectionTitle>
+                <span className="text-[11px] font-mono text-[#0066ff] tabular-nums">{logoScale}%</span>
+              </div>
+              <input type="range" min="10" max="150" value={logoScale} onChange={(e) => setLogoScale(parseInt(e.target.value))} className="w-full" />
             </div>
-            <input 
-              type="range" 
-              min="10" 
-              max="100" 
-              value={logoScale}
-              onChange={(e) => setLogoScale(parseInt(e.target.value))}
-              className="w-full"
-            />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <SectionTitle className="mb-0 text-[10px]">Offset X</SectionTitle>
+                  <span className="text-[10px] font-mono text-[#71717a]">{logoX}%</span>
+                </div>
+                <input type="range" min="-50" max="50" value={logoX} onChange={(e) => setLogoX(parseInt(e.target.value))} className="w-full" />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <SectionTitle className="mb-0 text-[10px]">Offset Y</SectionTitle>
+                  <span className="text-[10px] font-mono text-[#71717a]">{logoY}%</span>
+                </div>
+                <input type="range" min="-50" max="50" value={logoY} onChange={(e) => setLogoY(parseInt(e.target.value))} className="w-full" />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <SectionTitle className="mb-0 text-[10px]">Rotation</SectionTitle>
+                <span className="text-[10px] font-mono text-[#71717a]">{logoRotation}°</span>
+              </div>
+              <input type="range" min="-180" max="180" value={logoRotation} onChange={(e) => setLogoRotation(parseInt(e.target.value))} className="w-full" />
+            </div>
           </div>
+
+          {/* Effects */}
+          <div className="space-y-3 pt-4 border-t border-[#27272a]">
+            <SectionTitle>Effects</SectionTitle>
+            
+            <div className="space-y-3">
+              <button 
+                onClick={() => setShowShadow(!showShadow)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border text-[12px] transition-all ${showShadow ? 'bg-[#0066ff]/10 border-[#0066ff]/30 text-white' : 'bg-[#27272a]/50 border-[#3f3f46] text-[#71717a]'}`}
+              >
+                <span>Drop Shadow</span>
+                <div className={`w-3 h-3 rounded-full ${showShadow ? 'bg-[#0066ff]' : 'bg-[#3f3f46]'}`} />
+              </button>
+
+              {showShadow && (
+                <div className="grid grid-cols-2 gap-3 px-1">
+                   <div>
+                      <p className="text-[10px] text-[#71717a] mb-1">Blur</p>
+                      <input type="range" min="0" max="50" value={shadowBlur} onChange={(e) => setShadowBlur(parseInt(e.target.value))} className="w-full h-1" />
+                   </div>
+                   <div>
+                      <p className="text-[10px] text-[#71717a] mb-1">Color</p>
+                      <input type="color" value={shadowColor} onChange={(e) => setShadowColor(e.target.value)} className="w-full h-4 bg-transparent cursor-pointer" />
+                   </div>
+                </div>
+              )}
+
+              <button 
+                onClick={() => setShowBevel(!showBevel)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border text-[12px] transition-all ${showBevel ? 'bg-[#0066ff]/10 border-[#0066ff]/30 text-white' : 'bg-[#27272a]/50 border-[#3f3f46] text-[#71717a]'}`}
+              >
+                <span>Bevel Effect</span>
+                <div className={`w-3 h-3 rounded-full ${showBevel ? 'bg-[#0066ff]' : 'bg-[#3f3f46]'}`} />
+              </button>
+
+              <button 
+                onClick={() => setShowScore(!showScore)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border text-[12px] transition-all ${showScore ? 'bg-[#0066ff]/10 border-[#0066ff]/30 text-white' : 'bg-[#27272a]/50 border-[#3f3f46] text-[#71717a]'}`}
+              >
+                <span>Score lines</span>
+                <div className={`w-3 h-3 rounded-full ${showScore ? 'bg-[#0066ff]' : 'bg-[#3f3f46]'}`} />
+              </button>
+            </div>
+          </div>
+
 
           {/* Splash Advanced Settings */}
           {assetType === 'splash' && (
